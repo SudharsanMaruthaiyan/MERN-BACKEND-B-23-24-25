@@ -1,0 +1,15 @@
+{
+  "name": "revamp-calculator",
+  "version": "1.0.0",
+  "main": "Cal.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "revamp-calculator": "^1.0.0"
+  }
+}
