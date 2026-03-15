@@ -5,10 +5,25 @@ const app = express();
 
 const PORT = 8000;
 
-app.get("/asd", (req, res) => {
-  res.send("Hello World! Developer...");
+app.get("/product", (req, res) => {
+  // 1, Data from front-end
+
+  // 2, DB logic
+
+  // 3, data to front-end
+  res.send("Hello express!!");
+});
+
+app.get("/bus", (req, res) => {
+  // 1, Data from front-end
+
+  // 2, DB logic
+  
+
+  // 3, data to front-end
+  res.send("Hello bus 1");
 });
 
 app.listen(PORT, () => {
-  console.log(`Api is working on ${PORT}`);
+  console.log(`Api is working in port ${PORT}`);
 });
