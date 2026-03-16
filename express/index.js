@@ -18,7 +18,6 @@ app.get("/bus", (req, res) => {
   // 1, Data from front-end
 
   // 2, DB logic
-  
 
   // 3, data to front-end
   res.send("Hello bus 1");
