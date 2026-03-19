@@ -83,6 +83,57 @@ app.post("/restaurants", async (req, res) => {
   }
 });
 
+// PUT => /localhost:8000/restaurant => update the restaurant
+app.put("/restaurant", async (req, res) => {
+  try {
+    // 1, Data from front-end
+    const data = req.body;
+
+    // 2, DB logic
+    const newUpdatedRestaurant = await prisma.restaurants.update({
+      where: {
+        restaurant_id: data.restaurant_id,
+      },
+      data: {
+        name: data.name,
+        location: data.location,
+        image_url: data.image_url,
+        offer: data.offer,
+      },
+    });
+
+    // 3, Data to front-end
+    res.status(200).json({
+      message: "Data Updated Successfully",
+      data: newUpdatedRestaurant,
+    });
+  } catch (error) {
+    console.log("Internal server error", error);
+    res.status(500).json({ message: "Internal server error", error: error });
+  }
+});
+
+// DELETE => /restaurant  => delete the restaurant data
+app.delete("/restaurant", async (req, res) => {
+  try {
+    // 1, Data from front-end
+    const data = req.body;
+
+    // 2, DB logic
+    await prisma.restaurants.delete({
+      where: {
+        restaurant_id: data.restaurant_id,
+      },
+    });
+
+    // 3, Data to front-end
+    res.status(200).json({ message: "Restaurant Delete successfully" });
+  } catch (error) {
+    console.log("Internal server error", error);
+    res.status(500).json({ message: "Internal server error", error: error });
+  }
+});
+
 app.listen(PORT, () => {
   console.log("Api is ready work..", PORT);
 });
