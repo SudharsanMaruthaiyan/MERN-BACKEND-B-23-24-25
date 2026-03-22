@@ -2,10 +2,57 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
+var morgan = require("morgan");
 
 const app = express();
 const prisma = new PrismaClient();
 app.use(express.json());
+
+app.use(morgan("dev"));
+
+const middleware1 = (req, res, next) => {
+  console.log("middleware1");
+  next();
+};
+
+const middleware2 = (req, res, next) => {
+  console.log("middleware2");
+  next();
+};
+// app.use(middleware1);
+// app.use(middleware2);
+
+const authMiddleware = (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const ans = jwt.verify(token, "sd-rooms", function (err, decoded) {
+      if (!err) {
+        req.users = {
+          role: decoded.role,
+        };
+        next();
+      } else {
+        res.status(401).send("Invalid Token");
+      }
+    });
+
+    console.log(token, ans);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const RBAC = (ROLE) => {
+  return (req, res, next) => {
+    const { role } = req.users;
+
+    if (role === ROLE) {
+      next();
+    } else {
+      res.send("No Access for this role");
+    }
+  };
+};
 
 app.get("/", (req, res) => {
   res.send("Api is working...");
@@ -82,18 +129,23 @@ app.post("/login", async (req, res) => {
       function (err, result) {
         if (result) {
           var temp_key = jwt.sign(
-            { user_id: isUserExists.user_id, email_id: isUserExists.email_id },
+            {
+              user_id: isUserExists.user_id,
+              email_id: isUserExists.email_id,
+              role: isUserExists.role,
+            },
             "sd-rooms",
-            { expiresIn: "5s" },
+            { expiresIn: "3h" },
           );
 
           var main_key = jwt.sign(
             {
               user_id: isUserExists.user_id,
               email_id: isUserExists.email_id,
+              role: isUserExists.role,
             },
             "sd-main-rooms",
-            { expiresIn: "10s" },
+            { expiresIn: "10h" },
           );
 
           const datass = {
@@ -131,6 +183,7 @@ app.post("/refresh", (req, res) => {
         {
           user_id: decoded.user_id,
           email_id: decoded.email_id,
+          role: isUserExists.role,
         },
         "sd-rooms",
         { expiresIn: "5s" },
@@ -143,6 +196,33 @@ app.post("/refresh", (req, res) => {
   });
 
   // 3, Data to front-end
+});
+
+// GET => /user  // public => // fetch all user
+app.get("/users", authMiddleware, async (req, res) => {
+  // 1, Data from front-end
+
+  // 2, DB Logic
+  const user = await prisma.users.findMany();
+
+  // 3, Data to front-end
+  res.send(user);
+});
+
+// GET => /user/:user_id => fetch the user by id
+app.get("/user/:user_id", authMiddleware, RBAC("USERs"), async (req, res) => {
+  // 1, Data from Front-end
+  const { user_id } = req.params;
+
+  // 2, DB logic
+  const userData = await prisma.users.findUnique({
+    where: {
+      user_id: user_id,
+    },
+  });
+
+  // 3, Data to front-end
+  res.send(userData);
 });
 
 const PORT = 5000;
