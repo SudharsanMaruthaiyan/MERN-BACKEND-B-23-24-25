@@ -1,0 +1,55 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ProofType {
+    AADHARCARD
+    PANCARD
+}
+
+enum PaymentType {
+    CASH
+    NEFT
+    BANKTRANSFER
+}
+
+// Step1: Take the primary key in the primary Table
+//  Student roll_no
+// Step2: Paste primary key in Secondary Table
+//  And make relationship using field and reference, with primary table
+// Step3: Paste the Secondary table in the primary Table
+
+model Student {
+    roll_no String @unique
+    name    String 
+    gender  String
+    dob     String
+    blood_group String
+
+    studentProof StrudentProof?
+    studentFees  StudentFees[]
+}
+
+model StrudentProof {
+    student_proof_id String @unique
+    proof_type ProofType
+    proof_link String
+
+    roll_no String @unique
+    student Student @relation(fields:[roll_no], references: [roll_no])
+}
+
+model StudentFees {
+    student_fees_id String @unique
+    payment_id String
+    payment_mode PaymentType
+    payment_amount String
+
+    roll_no String 
+    student Student @relation(fields:[roll_no], references: [roll_no])
+}
