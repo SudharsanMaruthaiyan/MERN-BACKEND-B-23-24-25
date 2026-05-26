@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
@@ -6,6 +7,7 @@ var morgan = require("morgan");
 
 const app = express();
 const prisma = new PrismaClient();
+app.use(cors());
 app.use(express.json());
 
 app.use(morgan("dev"));
@@ -186,7 +188,7 @@ app.post("/refresh", (req, res) => {
           role: isUserExists.role,
         },
         "sd-rooms",
-        { expiresIn: "5s" },
+        { expiresIn: "3h" },
       );
 
       res.status(200).json({ message: "Token Generated", data: temp_key });
@@ -210,7 +212,7 @@ app.get("/users", authMiddleware, async (req, res) => {
 });
 
 // GET => /user/:user_id => fetch the user by id
-app.get("/user/:user_id", authMiddleware, RBAC("USERs"), async (req, res) => {
+app.get("/user/:user_id", authMiddleware, RBAC("USER"), async (req, res) => {
   // 1, Data from Front-end
   const { user_id } = req.params;
 
